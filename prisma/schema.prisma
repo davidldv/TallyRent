@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum BookingStatus {
+  DRAFT
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PaymentKind {
+  DEPOSIT
+  BALANCE
+}
+
+enum PaymentStatus {
+  REQUIRES_PAYMENT_METHOD
+  REQUIRES_CONFIRMATION
+  PROCESSING
+  SUCCEEDED
+  CANCELED
+}
+
+model Shop {
+  id                        String   @id @default(cuid())
+  name                      String
+  timezone                  String   @default("UTC")
+  stripeConnectAccountId    String?
+  stripeOnboardingComplete  Boolean  @default(false)
+
+  items     Item[]
+  customers Customer[]
+  bookings  Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Item {
+  id            String  @id @default(cuid())
+  shopId        String
+  name          String
+  sku           String?
+  quantity      Int     @default(1)
+  dailyRateCents Int    @default(0)
+  depositCents  Int     @default(0)
+  active        Boolean @default(true)
+
+  shop         Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  bookingItems BookingItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([shopId])
+}
+
+model Customer {
+  id      String  @id @default(cuid())
+  shopId  String
+  name    String
+  email   String?
+  phone   String?
+
+  shop     Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([shopId])
+}
+
+model Booking {
+  id         String        @id @default(cuid())
+  shopId     String
+  customerId String
+  startAt    DateTime
+  endAt      DateTime
+  status     BookingStatus @default(PENDING)
+  notes      String?
+
+  shop     Shop       @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  customer Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  items    BookingItem[]
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([shopId, startAt, endAt])
+  @@index([customerId])
+}
+
+model BookingItem {
+  id        String @id @default(cuid())
+  bookingId String
+  itemId    String
+  quantity  Int    @default(1)
+
+  dailyRateCentsSnapshot Int?
+  depositCentsSnapshot   Int?
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  item    Item    @relation(fields: [itemId], references: [id], onDelete: Restrict)
+
+  @@index([bookingId])
+  @@index([itemId])
+}
+
+model Payment {
+  id                 String        @id @default(cuid())
+  bookingId          String
+  kind               PaymentKind
+  amountCents        Int
+  currency           String        @default("usd")
+  status             PaymentStatus @default(REQUIRES_PAYMENT_METHOD)
+  stripePaymentIntentId String?
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([bookingId])
+  @@index([stripePaymentIntentId])
+}
