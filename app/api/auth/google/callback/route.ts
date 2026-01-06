@@ -96,6 +96,8 @@ export async function GET(request: Request) {
 
   } catch (e) {
     console.error(e);
-    return Response.redirect(new URL('/login?error=oauth_failed', request.url));
+    // Cast error to any to access message safely
+    const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+    return Response.redirect(new URL(`/login?error=oauth_failed&details=${encodeURIComponent(errorMessage)}`, request.url));
   }
 }

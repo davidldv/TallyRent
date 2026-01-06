@@ -11,10 +11,21 @@ import { AuthVisual } from '@/components/auth-visual'
 import { useTranslations } from 'next-intl'
 import { GoogleLoginButton } from '@/components/google-login-button'
 
+import { useSearchParams } from 'next/navigation'
+
 export default function LoginPage() {
   const t = useTranslations('Auth')
   const [state, action, isPending] = useActionState(login, undefined)
   const { error } = useToast()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const errorParam = searchParams.get('error')
+    const errorDetails = searchParams.get('details')
+    if (errorParam === 'oauth_failed') {
+      error(errorDetails ? `Login failed: ${errorDetails}` : 'Google login failed')
+    }
+  }, [searchParams, error])
 
   useEffect(() => {
     if (state?.message) {
