@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { prisma as db } from "@/lib/db";
 import { createSession } from '@/lib/session'
 import { NextResponse } from 'next/server';
+import { decodeIdToken } from "arctic";
 
 interface GoogleUser {
   sub: string;
@@ -42,22 +43,19 @@ export async function GET(request: Request) {
 
   try {
     const tokens = await google.validateAuthorizationCode(code, storedCodeVerifier);
-    const accessToken = tokens.accessToken;
-    const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      }
-    });
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Google UserInfo Failed: ${response.status} ${errorText}`);
-    }
+    const claims = decodeIdToken(tokens.idToken()) as any;
+    const googleUser: GoogleUser = {
+      sub: claims.sub,
+      name: claims.name,
+      email: claims.email,
+      picture: claims.picture,
+      email_verified: claims.email_verified
+    };
 
-    const googleUser = await response.json();
     
     // Support both 'sub' and 'id' as Google sometimes returns 'id' depending on endpoint/scope
-    const googleId = googleUser.sub || googleUser.id;
+    const googleId = googleUser.sub;
     
     if (!googleId) {
         throw new Error(`Google UserInfo missing 'sub' or 'id': ${JSON.stringify(googleUser)}`);
