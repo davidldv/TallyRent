@@ -41,16 +41,30 @@ export async function GET(request: Request) {
 
   try {
     const tokens = await google.validateAuthorizationCode(code, storedCodeVerifier);
+    const accessToken = tokens.accessToken;
     const response = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
       headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
+        Authorization: `Bearer ${accessToken}`
       }
     });
-    const googleUser: GoogleUser = await response.json();
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Google UserInfo Failed: ${response.status} ${errorText}`);
+    }
+
+    const googleUser = await response.json();
+    
+    // Support both 'sub' and 'id' as Google sometimes returns 'id' depending on endpoint/scope
+    const googleId = googleUser.sub || googleUser.id;
+    
+    if (!googleId) {
+        throw new Error(`Google UserInfo missing 'sub' or 'id': ${JSON.stringify(googleUser)}`);
+    }
 
     const existingUser = await db.user.findUnique({
       where: {
-        googleId: googleUser.sub
+        googleId: googleId
       }
     });
 
@@ -66,14 +80,14 @@ export async function GET(request: Request) {
             // Link account
             await db.user.update({
                 where: { id: userByEmail.id },
-                data: { googleId: googleUser.sub }
+                data: { googleId: googleId }
             });
             userId = userByEmail.id;
         } else {
             // Create user
             const newUser = await db.user.create({
                 data: {
-                    googleId: googleUser.sub,
+                    googleId: googleId,
                     email: googleUser.email,
                     name: googleUser.name
                 }
