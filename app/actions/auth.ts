@@ -4,7 +4,8 @@ import { z } from 'zod'
 import { prisma } from '@/lib/db'
 import { hash, compare } from 'bcryptjs'
 import { createSession, deleteSession } from '@/lib/session'
-import { redirect } from 'next/navigation'
+import { redirect } from '@/i18n/routing'
+import { getLocale } from 'next-intl/server'
 
 const signupSchema = z.object({
   email: z.string().email(),
@@ -57,8 +58,9 @@ export async function signup(prevState: any, formData: FormData) {
 
   await createSession(user.id)
   
+  const locale = await getLocale();
   // Redirect to onboarding to create business profile
-  redirect('/onboarding')
+  redirect({ href: '/onboarding', locale })
 }
 
 export async function login(prevState: any, formData: FormData) {
@@ -103,14 +105,17 @@ export async function login(prevState: any, formData: FormData) {
     where: { userId: user.id },
   })
   
+  const locale = await getLocale();
+
   if (!business) {
-    redirect('/onboarding')
+    redirect({ href: '/onboarding', locale })
   }
 
-  redirect('/dashboard')
+  redirect({ href: '/dashboard', locale })
 }
 
 export async function logout() {
   await deleteSession()
-  redirect('/login')
+  const locale = await getLocale();
+  redirect({ href: '/login', locale })
 }

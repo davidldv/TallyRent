@@ -1,7 +1,8 @@
-import { redirect } from 'next/navigation'
+import { redirect } from '@/i18n/routing'
 import { prisma } from '@/lib/db'
 import { stripe } from '@/lib/stripe'
 import { verifySession } from '@/lib/session'
+import { getLocale } from 'next-intl/server'
 
 export default async function StripeReturnPage() {
   const session = await verifySession()
@@ -9,9 +10,12 @@ export default async function StripeReturnPage() {
   const business = await prisma.business.findUnique({
     where: { userId: session.userId },
   })
+  
+  const locale = await getLocale()
 
   if (!business || !business.stripeConnectAccountId) {
-    redirect('/dashboard')
+    redirect({ href: '/dashboard', locale })
+    return null;
   }
 
   // Check if onboarding is actually complete
@@ -24,5 +28,6 @@ export default async function StripeReturnPage() {
     })
   }
 
-  redirect('/dashboard')
+  redirect({ href: '/dashboard', locale })
+  return null;
 }

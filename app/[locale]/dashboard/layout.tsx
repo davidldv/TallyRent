@@ -1,7 +1,7 @@
 import { verifySession } from "@/lib/session";
 import { LogoutButton } from "@/components/logout-button";
 import { getTranslations } from 'next-intl/server'; // Server-side translation helper
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 
 export default async function DashboardLayout({
   children,

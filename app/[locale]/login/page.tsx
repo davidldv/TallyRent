@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect } from 'react'
 import { login } from '@/app/actions/auth'
-import Link from 'next/link'
+import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/simple-toast'
 import { cn } from '@/lib/utils'
@@ -57,7 +57,7 @@ export default function LoginPage() {
            <ArrowLeft className="w-4 h-4" />
            {t('backToHome')}
         </Link>
-        <div className="w-full max-w-[350px] space-y-6">
+        <div className="w-full max-w-87.5 space-y-6">
           <div className="flex flex-col space-y-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">{t('login.title')}</h1>
             <p className="text-sm text-muted-foreground">

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { DatePicker } from "@/components/ui/date-picker";
-import Link from "next/link";
+import { Link } from '@/i18n/routing';
 import { ArrowLeft } from "lucide-react";
 
 type Product = {

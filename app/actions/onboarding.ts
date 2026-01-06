@@ -3,7 +3,8 @@
 import { z } from 'zod'
 import { prisma } from '@/lib/db'
 import { verifySession } from '@/lib/session'
-import { redirect } from 'next/navigation'
+import { redirect } from '@/i18n/routing'
+import { getLocale } from 'next-intl/server'
 
 const businessSchema = z.object({
   name: z.string().min(2),
@@ -39,5 +40,6 @@ export async function createBusiness(prevState: any, formData: FormData) {
     }
   }
 
-  redirect('/dashboard')
+  const locale = await getLocale();
+  redirect({ href: '/dashboard', locale })
 }

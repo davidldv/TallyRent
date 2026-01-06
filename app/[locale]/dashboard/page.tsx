@@ -1,9 +1,8 @@
 import { prisma } from "@/lib/db";
 import { verifySession } from "@/lib/session";
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import { Link, redirect } from '@/i18n/routing';
 import { connectStripe } from "@/app/actions/stripe";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 
 function formatDateTimeUtc(d: Date) {
   return new Date(d).toLocaleDateString("en-US", { 
@@ -14,6 +13,7 @@ function formatDateTimeUtc(d: Date) {
 export default async function DashboardPage() {
   const session = await verifySession();
   const t = await getTranslations('Dashboard');
+  const locale = await getLocale();
   
   const now = new Date();
   const year = now.getUTCFullYear();
@@ -27,7 +27,8 @@ export default async function DashboardPage() {
   });
 
   if (!business) {
-    redirect("/onboarding");
+    redirect({ href: "/onboarding", locale });
+    return null; // TS satisfaction
   }
 
   const bookings = await prisma.booking.findMany({
