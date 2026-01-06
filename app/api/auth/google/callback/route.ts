@@ -2,6 +2,7 @@ import { google } from "@/lib/oauth";
 import { cookies } from "next/headers";
 import { prisma as db } from "@/lib/db";
 import { createSession } from '@/lib/session'
+import { NextResponse } from 'next/server';
 
 interface GoogleUser {
   sub: string;
@@ -108,14 +109,12 @@ export async function GET(request: Request) {
     
     // Use NextResponse to ensure cookies are preserved
     const redirectUrl = new URL(`/${locale}/dashboard`, request.url);
-    // Explicitly copy cookies to the response if needed, 
-    // but Next.js usually handles this with the cookies() API
-    return Response.redirect(redirectUrl);
+    return NextResponse.redirect(redirectUrl);
 
   } catch (e) {
     console.error(e);
     // Cast error to any to access message safely
     const errorMessage = e instanceof Error ? e.message : 'Unknown error';
-    return Response.redirect(new URL(`/login?error=oauth_failed&details=${encodeURIComponent(errorMessage)}`, request.url));
+    return NextResponse.redirect(new URL(`/login?error=oauth_failed&details=${encodeURIComponent(errorMessage)}`, request.url));
   }
 }
