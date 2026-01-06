@@ -47,8 +47,8 @@ export async function connectStripe() {
   
   const accountLink = await stripe.accountLinks.create({
     account: accountId,
-    refresh_url: `${origin}/${locale}/dashboard`,
-    return_url: `${origin}/${locale}/dashboard/stripe/return`,
+    refresh_url: `${origin}/dashboard`,
+    return_url: `${origin}/dashboard/stripe/return`,
     type: 'account_onboarding',
   })
 

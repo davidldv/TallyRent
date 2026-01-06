@@ -103,10 +103,8 @@ export async function GET(request: Request) {
     await createSession(userId);
     
     const cookieStore = await cookies();
-    const locale = cookieStore.get('NEXT_LOCALE')?.value || 'en';
-    
     // Use NextResponse to ensure cookies are preserved
-    const redirectUrl = new URL(`/${locale}/dashboard`, request.url);
+    const redirectUrl = new URL(`/dashboard`, request.url);
     return NextResponse.redirect(redirectUrl);
 
   } catch (e) {

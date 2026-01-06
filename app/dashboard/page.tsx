@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { verifySession } from "@/lib/session";
-import { Link, redirect } from '@/i18n/routing';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { connectStripe } from "@/app/actions/stripe";
 import { getTranslations, getLocale } from "next-intl/server";
 
@@ -27,7 +28,7 @@ export default async function DashboardPage() {
   });
 
   if (!business) {
-    redirect({ href: "/onboarding", locale });
+    redirect("/onboarding");
     return null; // TS satisfaction
   }
 

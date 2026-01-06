@@ -1,4 +1,5 @@
-import { Link, redirect } from '@/i18n/routing';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { getSession } from "@/lib/session";
 import { getTranslations, getLocale } from 'next-intl/server';
 
@@ -8,7 +9,7 @@ export default async function Home() {
 
   const session = await getSession();
   if (session) {
-    redirect({ href: "/dashboard", locale });
+    redirect("/dashboard");
     return null;
   }
 

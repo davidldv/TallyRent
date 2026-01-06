@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect } from 'react'
 import { signup } from '@/app/actions/auth'
-import { Link } from '@/i18n/routing';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/simple-toast'
 import { cn } from '@/lib/utils'
